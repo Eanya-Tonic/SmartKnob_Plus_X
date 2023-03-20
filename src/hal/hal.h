@@ -42,7 +42,7 @@ namespace HAL
     void surface_dial_press(void);
     bool surface_dial_is_connected(void);
 
-    void wifi_init(void);
+    void wifi_init(void* parameter);
     bool wifi_is_connected(void);
     void wifi_disconnect(void);
     void wifi_dial_update(SuperDialMotion direction);
@@ -54,8 +54,9 @@ namespace HAL
     int return_hour(void);
     int return_minute(void);
     
-    void OTA_setup(void);
-    void OTAloop(void);
+    void OTA_setup(void* parameter);
+    void OTAloop(void* parameter);
+    String updateInfo(void);
 
     void power_init(void);
     void power_off(void);

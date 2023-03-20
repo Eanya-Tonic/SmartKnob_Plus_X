@@ -37,7 +37,7 @@ app_mode_config_t app_config[] = {
 		.motor_mode = MOTOR_SUPER_DIAL,
 	},
 	[APP_MODE_OTA] = {
-		.motor_mode = MOTOR_SUPER_DIAL,
+		.motor_mode = MOTOR_UNBOUND_NO_DETENTS,
 	},
 	[APP_MODE_HOME_ASSISTANT] = {
 		.motor_mode = MOTOR_UNBOUND_COARSE_DETENTS,
@@ -45,6 +45,7 @@ app_mode_config_t app_config[] = {
 };
 
 int16_t app = 0;
+static bool OTA = false;
 
 Playground::Playground()
 {
@@ -82,13 +83,34 @@ void Playground::onViewLoad()
 	case APP_MODE_WIFI_DIAL:
 		Model = (wifiDialModel *)new wifiDialModel();
 		View = (PlaygroundView *)new wifiDialView();
-		HAL::wifi_init();
+		xTaskCreatePinnedToCore(
+			HAL::wifi_init,
+			"WiFiThread",
+			8192,
+			nullptr,
+			1,
+			nullptr,
+			ESP32_RUNNING_CORE);
 		break;
 	case APP_MODE_OTA:
 		Model = (OTAModel *)new OTAModel();
 		View = (PlaygroundView *)new OTAView();
-		HAL::wifi_init();
-		HAL::OTA_setup();
+		xTaskCreatePinnedToCore(
+			HAL::wifi_init,
+			"WiFiThread",
+			8192,
+			nullptr,
+			1,
+			nullptr,
+			ESP32_RUNNING_CORE);
+		xTaskCreatePinnedToCore(
+			HAL::OTA_setup,
+			"OTAThread",
+			8192,
+			nullptr,
+			1,
+			nullptr,
+			ESP32_RUNNING_CORE);
 		break;
 	case APP_MODE_HOME_ASSISTANT:
 		Model = (SurfaceDialModel *)new HassModel();
@@ -263,10 +285,17 @@ void Playground::WifiDialEventHandler(lv_event_t *event, lv_event_code_t code)
 
 void Playground::OTAEventHandler(lv_event_t *event, lv_event_code_t code)
 {
-	if (code == LV_EVENT_PRESSED)
+	if (code == LV_EVENT_PRESSED && !OTA && HAL::wifi_is_connected())
 	{
-		if (HAL::wifi_is_connected)
-			HAL::OTAloop();
+		xTaskCreatePinnedToCore(
+			HAL::OTAloop,
+			"OTALoopThread",
+			8192,
+			nullptr,
+			configMAX_PRIORITIES - 1,
+			nullptr,
+			ESP32_RUNNING_CORE);
+		OTA = true;
 	}
 }
 

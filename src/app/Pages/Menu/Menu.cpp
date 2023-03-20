@@ -78,7 +78,7 @@ void Menu::Update()
 
 	// 设置默认
 	String GET_DEVICE_NAME = "SmartKnob X";
-	String GET_DEVICE_VERSION = "1.0.0";
+	String GET_DEVICE_VERSION = "0.0.9";
 	String GET_DEVICE_USER = "EanyaTonic";
 	if (EEPROM.read(DEVICE_NAME_ADDR) != 0)
 	{

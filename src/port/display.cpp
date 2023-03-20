@@ -1,6 +1,7 @@
 #include "display.h"
 #include "config.h"
 #include "hal/hal.h"
+#include "soc/rtc_wdt.h"
 
 TaskHandle_t handleTaskLvgl;
 void TaskLvglUpdate(void* parameter)
@@ -11,6 +12,8 @@ void TaskLvglUpdate(void* parameter)
         lv_task_handler();
 
         vTaskDelay(5);
+
+        rtc_wdt_feed();
     }
 }
 
@@ -37,7 +40,7 @@ void display_init(void)
         "LvglThread",
         8192,
         nullptr,
-        configMAX_PRIORITIES - 1,
+        configMAX_PRIORITIES,
         &handleTaskLvgl,
         LVGL_RUNNING_CORE);
 

@@ -5,7 +5,7 @@
 #include <DNSServer.h>
 #include <PubSubClient.h>
 #include <EEPROM.h>
-#include <ota.h>
+#include <ESP-GitHub-OTA/ota.h>
 #include "hal/EEPROM_utils.h"
 #include "hal/EEPROM_utils.h"
 
@@ -117,10 +117,6 @@ void wifi_loop(void *parameter)
     set_String(PASSWORD_NUM, PASSWORD_ADDR + 1, GET_PASSWORD);
     Serial.print("本地IP: ");
     Serial.println(WiFi.localIP());
-    while (!getTime(1))
-    {
-      vTaskDelay(1000);
-    }
     Udp.begin(udp_port); // 启动UDP监听端口
     vTaskDelay(200);
     WiFi.enableAP(false);
@@ -167,11 +163,11 @@ void initDNS(void)
 bool ServerFlag = false;
 void connectNewWifi(void)
 {
-  vTaskDelay(5000);
+  vTaskDelay(8000);
   if (WiFi.status() != WL_CONNECTED && ServerFlag == false)
   {
     ServerFlag = true;
-    // 如果5秒内没有连上，就开启Web配网 可适当调整这个时间
+    // 如果8秒内没有连上，就开启Web配网 可适当调整这个时间
     initSoftAP();
     initWebServer();
     initDNS();
@@ -189,10 +185,6 @@ void connectNewWifi(void)
     Serial.println("WIFI Connected!");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP()); // 打印esp32的IP地址
-    while (!getTime(1))
-    {
-      vTaskDelay(1000);
-    }
     Udp.begin(udp_port); // 启动UDP监听端口
     if (ServerFlag)
       server.stop();
@@ -219,6 +211,10 @@ void UDP_loop(void *parameter)
       Udp.print("connected");                            // 将数据放入发送的缓冲区
       Udp.endPacket();                                   // 向目标IP目标端口发送数据
       UDPConnected = true;
+      while (getTime(1))
+      {
+        vTaskDelay(1000);
+      }
     }
     else if (incomingPacket[0] == '1')
     {
@@ -283,7 +279,7 @@ void UDP_loop(void *parameter)
       set_String(MQTT_PASSWORD_NUM, MQTT_PASSWORD_ADDR + 1, GET_MQTT_PASSWORD);
     }
   }
-  vTaskDelay(1);
+  vTaskDelay(100);
 }
 
 static int32_t currentHour, currentMinute;
@@ -436,7 +432,14 @@ int HAL::mqtt_publish(const char *topic, const char *playload)
 
 void HAL::mqtt_init(void)
 {
-  HAL::wifi_init();
+		xTaskCreatePinnedToCore(
+			HAL::wifi_init,
+			"WiFiThread",
+			8192,
+			nullptr,
+			1,
+			nullptr,
+			ESP32_RUNNING_CORE);
   // 获取EEPROM信息
   if (EEPROM.read(MQTT_IP_ADDR) != 0)
   {
@@ -468,7 +471,7 @@ void HAL::mqtt_deinit(void)
   vTaskDelete(handleTaskMqtt);
 }
 
-void HAL::wifi_init(void)
+void HAL::wifi_init(void* parameter)
 {
   // 连接wifi
   Serial.print("正在连接WIFI\n");
@@ -484,6 +487,7 @@ void HAL::wifi_init(void)
   }
   initBasic();
   connectNewWifi();
+  vTaskDelete(nullptr);
 }
 
 bool HAL::wifi_is_connected(void)
@@ -576,14 +580,15 @@ int HAL::updateTime(void)
   return tmpSecond;
 }
 
-void HAL::OTA_setup()
+void HAL::OTA_setup(void* parameter)
 {
-  init_ota("1.0.0");
+  init_ota("0.0.9", 1);
+  vTaskDelay(1);
+  vTaskDelete(nullptr);
 }
 
-void HAL::OTAloop()
+void HAL::OTAloop(void* parameter)
 {
   handle_ota("https://github.com/Eanya-Tonic/SmartKnob_Plus_X/releases/latest");
-  vTaskDelay(10);
-  ESP.restart();
+  vTaskDelete(nullptr);
 }

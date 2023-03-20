@@ -1,6 +1,7 @@
 #ifndef __OTA_VIEW_H
 #define __OTA_VIEW_H
 #include "Arduino.h"
+#include "soc/rtc_wdt.h"
 #include "app/app.h"
 #include "../Page.h"
 #include "PlaygroundView.h"

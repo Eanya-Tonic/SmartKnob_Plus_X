@@ -27,7 +27,7 @@ void Page::OTAView::UpdateView(PlaygroundInfo *info)
 	}
 	lv_meter_set_indicator_value(ui.meter, ui.nd_img_circle, motor_pos);
 	lv_color_t color;
-	if (millis() - last_publish > 5)
+	if (millis() - last_publish > 500)
 	{
 		if (HAL::LightMode())
 		{
@@ -39,7 +39,10 @@ void Page::OTAView::UpdateView(PlaygroundInfo *info)
 		}
 		lv_obj_set_style_img_recolor_opa(m_ui.img_wifi_dial, LV_OPA_COVER, 0);
 		lv_obj_set_style_img_recolor(m_ui.img_wifi_dial, color, 0);
+		lv_label_set_text(m_ui.label, HAL::updateInfo().c_str());
 	}
+	vTaskDelay(1);
+	rtc_wdt_feed();
 }
 
 void OTAView::Create(lv_obj_t *root)
@@ -51,7 +54,7 @@ void OTAView::Create(lv_obj_t *root)
 	lv_obj_align(m_ui.img_wifi_dial, LV_ALIGN_CENTER, 0, 0);
 
 	m_ui.label = lv_label_create(root);
-	lv_obj_set_style_text_font(m_ui.label, Resource.GetFont("HarmonyOS_Sans_SC_Regular_26"), 0);
+	lv_obj_set_style_text_font(m_ui.label, Resource.GetFont("HarmonyOS_Sans_SC_Regular_16"), 0);
 	if (HAL::LightMode() == 1)
 	{
 		lv_obj_set_style_text_color(m_ui.label, lv_color_black(), 0);
