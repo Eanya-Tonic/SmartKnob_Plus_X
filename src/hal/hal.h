@@ -8,15 +8,17 @@
 #include "config.h"
 #include "CommonMacro.h"
 
-typedef enum {
+typedef enum
+{
     SUPER_DIAL_NULL = 0,
     SUPER_DIAL_LEFT = 1,
-    SUPER_DIAL_RIGHT= 2,
+    SUPER_DIAL_RIGHT = 2,
 } SuperDialMotion;
 
-typedef enum {
+typedef enum
+{
     HASS_LEFT = 1,
-    HASS_RIGHT= 2,
+    HASS_RIGHT = 2,
     HASS_PUSH = 3,
     HASS_MAX,
 } HassMotion;
@@ -51,6 +53,9 @@ namespace HAL
     int updateTime(void);
     int return_hour(void);
     int return_minute(void);
+    
+    void OTA_setup(void);
+    void OTAloop(void);
 
     void power_init(void);
     void power_off(void);
@@ -65,6 +70,5 @@ namespace HAL
     int mqtt_subscribe(const char *topic);
     void mqtt_deinit(void);
 }
-
 
 #endif

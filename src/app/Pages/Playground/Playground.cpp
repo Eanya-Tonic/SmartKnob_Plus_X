@@ -4,6 +4,8 @@
 #include "SurfaceDialModel.h"
 #include "wifiDialView.h"
 #include "wifiDialModel.h"
+#include "OTAModel.h"
+#include "OTAView.h"
 #include "../HASS/HassModel.h"
 #include "../HASS/HassView.h"
 #include "../HASS/HassHalComm.h"
@@ -32,6 +34,9 @@ app_mode_config_t app_config[] = {
 		.motor_mode = MOTOR_SUPER_DIAL,
 	},
 	[APP_MODE_WIFI_DIAL] = {
+		.motor_mode = MOTOR_SUPER_DIAL,
+	},
+	[APP_MODE_OTA] = {
 		.motor_mode = MOTOR_SUPER_DIAL,
 	},
 	[APP_MODE_HOME_ASSISTANT] = {
@@ -78,6 +83,12 @@ void Playground::onViewLoad()
 		Model = (wifiDialModel *)new wifiDialModel();
 		View = (PlaygroundView *)new wifiDialView();
 		HAL::wifi_init();
+		break;
+	case APP_MODE_OTA:
+		Model = (OTAModel *)new OTAModel();
+		View = (PlaygroundView *)new OTAView();
+		HAL::wifi_init();
+		HAL::OTA_setup();
 		break;
 	case APP_MODE_HOME_ASSISTANT:
 		Model = (SurfaceDialModel *)new HassModel();
@@ -139,6 +150,9 @@ void Playground::onViewDidUnload()
 	switch (app)
 	{
 	case APP_MODE_WIFI_DIAL:
+		HAL::wifi_disconnect();
+		break;
+	case APP_MODE_OTA:
 		HAL::wifi_disconnect();
 		break;
 	case APP_MODE_HOME_ASSISTANT:
@@ -244,6 +258,15 @@ void Playground::WifiDialEventHandler(lv_event_t *event, lv_event_code_t code)
 			Serial.printf("Playground: realse\n");
 			HAL::wifi_dial_release();
 		}
+	}
+}
+
+void Playground::OTAEventHandler(lv_event_t *event, lv_event_code_t code)
+{
+	if (code == LV_EVENT_PRESSED)
+	{
+		if (HAL::wifi_is_connected)
+			HAL::OTAloop();
 	}
 }
 
@@ -363,6 +386,9 @@ void Playground::onEvent(lv_event_t *event)
 		break;
 	case APP_MODE_WIFI_DIAL:
 		instance->WifiDialEventHandler(event, code);
+		break;
+	case APP_MODE_OTA:
+		instance->OTAEventHandler(event, code);
 		break;
 	case APP_MODE_HOME_ASSISTANT:
 		instance->HassEventHandler(event, code);

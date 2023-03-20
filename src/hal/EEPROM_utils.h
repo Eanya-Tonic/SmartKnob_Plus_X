@@ -15,8 +15,8 @@ static int32_t SYSTEM_ADDR = 200;
 // EEPROM存储系统信息
 static int32_t DEVICE_NAME_ADDR = 300;
 static int32_t DEVICE_NAME_NUM = 0;
-static int32_t DEVICE_VERSION_ADDR = 400;
-static int32_t DEVICE_VERSION_NUM = 0;
+// static int32_t DEVICE_VERSION_ADDR = 400;
+// static int32_t DEVICE_VERSION_NUM = 0;
 static int32_t DEVICE_USER_ADDR = 500;
 static int32_t DEVICE_USER_NUM = 0;
 

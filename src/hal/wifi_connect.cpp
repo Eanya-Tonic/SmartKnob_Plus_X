@@ -5,6 +5,7 @@
 #include <DNSServer.h>
 #include <PubSubClient.h>
 #include <EEPROM.h>
+#include <ota.h>
 #include "hal/EEPROM_utils.h"
 #include "hal/EEPROM_utils.h"
 
@@ -573,4 +574,16 @@ int HAL::updateTime(void)
     vTaskDelay(1000);
   }
   return tmpSecond;
+}
+
+void HAL::OTA_setup()
+{
+  init_ota("1.0.0");
+}
+
+void HAL::OTAloop()
+{
+  handle_ota("https://github.com/Eanya-Tonic/SmartKnob_Plus_X/releases/latest");
+  vTaskDelay(10);
+  ESP.restart();
 }

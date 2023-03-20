@@ -55,6 +55,7 @@
           {
               APP_MODE_SUPER_DIAL = PLAYGROUND_MODE_MAX,
               APP_MODE_WIFI_DIAL,
+              APP_MODE_OTA,
               APP_MODE_HOME_ASSISTANT,
               APP_MODE_MAX,
           };

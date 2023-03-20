@@ -23,6 +23,7 @@ void Menu::onViewLoad()
 	AttachEvent(root, onPlaygroundEvent);
 	AttachEvent(View.ui.dialpad.icon, onSuperDialEvent);
 	AttachEvent(View.ui.wifipad.icon, onwifiDialEvent);
+	AttachEvent(View.ui.update.icon, onOTAEvent);
 	AttachEvent(View.ui.switches.icon, onPlaygroundEvent);
 	AttachEvent(View.ui.hass.icon, onHassEvent);
 	AttachEvent(View.ui.system.icon, onSystemEvent);
@@ -79,22 +80,18 @@ void Menu::Update()
 	String GET_DEVICE_NAME = "SmartKnob X";
 	String GET_DEVICE_VERSION = "1.0.0";
 	String GET_DEVICE_USER = "EanyaTonic";
-	if (EEPROM.read(DEVICE_VERSION_ADDR) != 0)
+	if (EEPROM.read(DEVICE_NAME_ADDR) != 0)
 	{
 		GET_DEVICE_NAME = get_String(EEPROM.read(DEVICE_NAME_ADDR), DEVICE_NAME_ADDR + 1);
-		GET_DEVICE_VERSION = get_String(EEPROM.read(DEVICE_VERSION_ADDR), DEVICE_VERSION_ADDR + 1);
 		GET_DEVICE_USER = get_String(EEPROM.read(DEVICE_USER_ADDR), DEVICE_USER_ADDR + 1);
 	}
 	else
 	{
 		DEVICE_NAME_NUM = GET_DEVICE_NAME.length();
-		DEVICE_VERSION_NUM = GET_DEVICE_VERSION.length();
 		DEVICE_USER_NUM = GET_DEVICE_USER.length();
 		EEPROM.write(DEVICE_NAME_ADDR, DEVICE_NAME_NUM);
-		EEPROM.write(DEVICE_VERSION_ADDR, DEVICE_VERSION_NUM);
 		EEPROM.write(DEVICE_USER_ADDR, DEVICE_USER_NUM);
 		set_String(DEVICE_NAME_NUM, DEVICE_NAME_ADDR + 1, GET_DEVICE_NAME);
-		set_String(DEVICE_VERSION_NUM, DEVICE_VERSION_ADDR + 1, GET_DEVICE_VERSION);
 		set_String(DEVICE_USER_NUM, DEVICE_USER_ADDR + 1, GET_DEVICE_USER);
 	}
 
@@ -168,6 +165,23 @@ void Menu::onwifiDialEvent(lv_event_t *event)
 	{
 		// instance->Model.ChangeMotorMode(MOTOR_FINE_DETENTS);
 		int16_t mode = APP_MODE_WIFI_DIAL;
+		Stash_t stash;
+		stash.ptr = &mode;
+		stash.size = sizeof(int16_t);
+		instance->Manager->Push("Pages/Playground", &stash);
+	}
+}
+
+void Menu::onOTAEvent(lv_event_t *event)
+{
+	lv_obj_t *obj = lv_event_get_target(event);
+	lv_event_code_t code = lv_event_get_code(event);
+	auto *instance = (Menu *)lv_obj_get_user_data(obj);
+
+	if (code == LV_EVENT_PRESSED)
+	{
+		// instance->Model.ChangeMotorMode(MOTOR_FINE_DETENTS);
+		int16_t mode = APP_MODE_OTA;
 		Stash_t stash;
 		stash.ptr = &mode;
 		stash.size = sizeof(int16_t);

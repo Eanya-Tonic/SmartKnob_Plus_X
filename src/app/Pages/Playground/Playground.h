@@ -31,6 +31,7 @@ namespace Page
         void PlayEventHandler(lv_event_t *event, lv_event_code_t code);
         void SurfaceDialEventHandler(lv_event_t *event, lv_event_code_t code);
         void WifiDialEventHandler(lv_event_t *event, lv_event_code_t code);
+        void OTAEventHandler(lv_event_t *event, lv_event_code_t code);
         void HassEventHandler(lv_event_t *event, lv_event_code_t code);
 
     private:
